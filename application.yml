@@ -1,0 +1,72 @@
+server:
+  port: 80 # set tomcat port 80
+
+spring:
+  application:
+    name: demochanybweb
+
+  # H2 Console 설정
+  h2:
+    console: # H2 DB를 웹에서 관리할 수 있는 기능
+      enabled: true           # H2 Console 사용 여부
+      path: /h2-console       # H2 Console 접속 주소
+
+  # H2 Database 설정
+  datasource:
+    driver-class-name: org.h2.Driver
+#      url: 'jdbc:h2:mem:test'   # H2 DB 연결 주소 (In-Memory Mode)
+    url: jdbc:h2:~/web1_db;    # H2 DB 연결 주소 (Embedded Mode)
+    username: username        # H2 DB 접속 ID (사용자 지정)
+    password: password        # H2 DB 접속 PW (사용자 지정)
+
+  # JPA 설정
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true      # 쿼리 로그 포맷 (정렬)
+        show_sql: true        # 쿼리 로그 출력
+
+    hibernate:
+      ddl-auto: create-drop        # DB 초기화 전략 (none, create, create-drop, update, validate)
+
+  # cloud config
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/your-org/your-config-repo
+          default-label: main
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+#        include: health, metrics, info, prometheus, traces
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failureRateThreshold: 50                  # 실패율 50% 이상 → Open
+        slowCallRateThreshold: 100
+        slowCallDurationThreshold: 60000
+        permittedNumberOfCallsInHalfOpenState: 1 # 한개만 성공해도 close 로 변환
+        maxWaitDurationInHalfOpenState: 1000
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10                     # 최근 10건 기준
+        waitDurationInOpenState: 50000     # 5000ms 후 Half-Open
+        minimumNumberOfCalls: 10
+    instances:
+      hello:
+        baseConfig: default
