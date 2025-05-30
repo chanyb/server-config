@@ -1,0 +1,9 @@
+
+my:
+  feature:
+    enabled: true
+    mode: dev
+
+logging:
+  level:
+    com.example: DEBUG
