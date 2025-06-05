@@ -7,6 +7,19 @@ logging:
     root: INFO
     org.springframework.web: DEBUG
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+#        include: health, metrics, info, prometheus, traces
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: "http://localhost:9411/api/v2/spans"
+
 
 # server:
 #   port: 80 # set tomcat port 80
